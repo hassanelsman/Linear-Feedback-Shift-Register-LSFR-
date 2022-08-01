@@ -1,0 +1,104 @@
+`timescale 1ns/1ps
+
+//module testbench name
+module LFSR_tb ();
+
+//parameters
+parameter clk_period = 100;  // clk frequency 10 MHz
+
+
+//testbench signals
+reg 		RST_tb,CLK_tb ;
+reg [3:0]	seed_tb ;
+wire 		Out_tb,valid_tb;
+
+//initial
+initial
+begin
+ $dumpfile("LFSR.vsd");
+ $dumpvars ;
+ 
+ CLK_tb = 0 ;
+ //call initialize
+ Initialize(4'b1001);
+ #(8*clk_period)
+ //call checkResult
+ checkResult ();
+ #(4*clk_period)
+ $stop;
+end
+
+
+
+//////////////////////////////////////////////////
+/////////////////////TASKS////////////////////////
+//////////////////////////////////////////////////
+
+
+///////////////////// Intialize///////////////////
+task Initialize ;
+input [3:0] 	seed;
+begin
+ RST_tb = 0 ;
+ seed_tb = seed ;
+ #clk_period
+ RST_tb = 1 ; 
+end
+endtask
+
+////////////////CHECK RESULT /////////////////////
+task checkResult ;
+begin
+ #clk_period
+ if(valid_tb == 1)
+  $display ("*****case 1 passed ******");
+ else
+  $display ("*****case 1 valid is NOT correct  ******");
+
+ if(Out_tb == 0)
+  $display ("*****case 2 passed ******");
+ else
+  $display ("*****case 2 Out0 NOT correct  ******");
+  
+ #clk_period
+ if(Out_tb == 0)
+  $display ("*****case 3 passed ******");
+ else
+  $display ("*****case 3 Out1 is NOT correct  ******");
+
+ #clk_period
+ if(Out_tb == 1)
+  $display ("*****case 4 passed ******");
+ else
+  $display ("*****case 4 Out2 NOT correct  ******");
+  
+ #clk_period
+ if(Out_tb == 1)
+  $display ("*****case 5 passed ******");
+ else
+  $display ("*****case 5 Out3 is NOT correct  ******");
+end
+
+endtask
+
+
+
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
+
+
+//clk generation
+always #(clk_period/2) CLK_tb = ~CLK_tb ;
+
+
+//instantiate Desig unit
+LFSR DUT (
+.CLK(CLK_tb),
+.RST(RST_tb),
+.seed(seed_tb),
+.OUT(Out_tb),
+.valid(valid_tb)	) ;
+
+
+endmodule

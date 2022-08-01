@@ -1,0 +1,46 @@
+module LFSR (
+
+input wire [3:0] 	seed,
+input wire			RST,CLK,
+output reg			valid,OUT	) ;
+
+
+reg [3:0]	R;
+reg [2:0]	count;
+wire 		valid_comb,Shift_valid ;
+reg [1:0]	Shift_count;
+
+always @ (posedge CLK or negedge RST) //reset is active low
+begin
+ if (!RST)
+  begin
+   R <= seed ;
+   count <= 3'b0;
+   Shift_count <= 2'b0 ;
+  end
+  
+ else if (!valid_comb)
+  begin
+   R[3] <= R[2] ^ (R[1] ^ R [0]);
+   count <= count + 1'b1 ;
+  end
+  
+  else 
+   begin
+    valid <= valid_comb ;
+	OUT <= R[0] ;
+   end
+   
+end
+
+always @(posedge CLK)
+begin 
+ if (valid & Shift_valid)
+  Shift_count <= Shift_count + 1'b1 ;
+  R <= R >> 1 ;
+end
+
+assign valid_comb = (count == 3'b111) ? 1'b1 : 1b'0 ;
+assign Shift_valid = (Shift_count == 3'b11) ? 1'b0 : 1b'1 ;
+
+endmodule
